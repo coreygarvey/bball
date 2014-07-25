@@ -9,7 +9,7 @@ agent = Mechanize.new
 
 
 player_ids = []
-CSV.foreach("raw/players.csv"){ |row| player_ids << row[1]}
+CSV.foreach("../raw/players.csv"){ |row| player_ids << row[1]}
 
 player_headers = ["id", "name", "fullname", "nickname", "twitter", "born", "position", "shoots", "heightft", "heightin", "weight", "bmonth", "bday", "byear", "bcity", "bstate", "bcountry", "hs", "hscity", "hsstate", "college", "draftteam", "draftround", "draftroundpick","draftoverall", "draftyear", "hofyear"]
 salary_headers = ["id","season","team","salary"]
@@ -17,7 +17,7 @@ for id in player_ids
 	first_letter = id[0,1]
 
 	playerPage = agent.get("http://www.basketball-reference.com/players/#{first_letter}/#{id}.html")	
-	CSV.open("raw/playerInfo.csv", 'a+', :write_headers => true, :headers => player_headers) do |csv|
+	CSV.open("../raw/playerInfo.csv", 'a+', :write_headers => true, :headers => player_headers) do |csv|
 	
 		player_headers = nil
 		row = [id]
@@ -191,7 +191,7 @@ for id in player_ids
 	end
 	# Salaries
 	salaries = playerPage.search("#salaries")
-	CSV.open("raw/playerSalaries.csv", 'a+', :write_headers => true, :headers => salary_headers) do |csv|
+	CSV.open("../raw/playerSalaries.csv", 'a+', :write_headers => true, :headers => salary_headers) do |csv|
 		salary_headers = nil
 		statsData = {}
 		1.upto(4) do |i|

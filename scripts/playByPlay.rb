@@ -30,7 +30,7 @@ for y in 2001..2014
 		# Play By Play
 		play_by_play_link = boxpage.search('.margin_right:nth-child(2)').children[0].attributes["href"].value
 		playByPlay_page = agent.get('http://www.basketball-reference.com' + play_by_play_link)
-		playByPlay = File.new("playByPlay/#{parts['game']}.html", "w+")
+		playByPlay = File.new("../playByPlay/#{parts['game']}.html", "w+")
 		pbp = playByPlay_page.search('.stats_table:nth-child(3)')
 		playByPlay.puts pbp
 		time = Time.now

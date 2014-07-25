@@ -62,7 +62,7 @@ for y in 1986..2014
 		dnp_home = length_home - length_played_home
 
 		# CSV.open("boxScores/basic.csv", 'a+', :write_headers => true, :headers => basic_headers) do |csv|
-		CSV.open("raw/basic.csv", 'a+', :write_headers => false) do |csv|
+		CSV.open("../raw/basic.csv", 'a+', :write_headers => false) do |csv|
 			basic_headers = nil
 			# BASIC AWAY
 			statsData = {}
@@ -192,7 +192,7 @@ for y in 1986..2014
 		end
 		
 		#CSV.open("boxScores/advanced.csv", 'ab', :write_headers => true, :headers => adv_headers) do |csv|
-		CSV.open("raw/advanced.csv", 'ab', :write_headers => false) do |csv|
+		CSV.open("../raw/advanced.csv", 'ab', :write_headers => false) do |csv|
 			adv_headers = nil
 			# ADVANCED AWAY
 			statsData = {}

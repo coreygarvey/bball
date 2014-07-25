@@ -30,7 +30,7 @@ for y in 2001..2014
 		# Shot Chart
 		shot_charts_link = boxpage.search('.padding:nth-child(3)').children[0].attributes["href"].value
 		shotChart = agent.get('http://www.basketball-reference.com' + shot_charts_link)
-		Dir.mkdir "shotCharts/#{parts['game']}"
+		Dir.mkdir "../shotCharts/#{parts['game']}"
 		fileAway = File.new("shotCharts/#{parts['game']}/away.html", "w+")
 		fileHome = File.new("shotCharts/#{parts['game']}/home.html", "w+")
 		shotChartAway = shotChart.search("#shots-#{away_abbr}")

@@ -29,7 +29,7 @@ schedpage = agent.get("http://www.basketball-reference.com/teams/").search('#act
 	team_page = agent.get('http://www.basketball-reference.com' + team_link)
 
 	# CSV.open("boxScores/basic.csv", 'a+', :write_headers => true, :headers => basic_headers) do |csv|
-	CSV.open("boxScores/teams.csv", 'a+', :write_headers => true, :headers => team_headers) do |csv|
+	CSV.open("../raw/teams.csv", 'a+', :write_headers => true, :headers => team_headers) do |csv|
 		team_headers = nil
 		columns = [1, 3, 4, 5, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 		# Team Data
