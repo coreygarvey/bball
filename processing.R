@@ -1,4 +1,4 @@
-setwd('/Users/cgarvey/Documents/NBA/main/')
+setwd('/Users/cgarvey/Documents/NBA/bball/')
 library(plyr)
 library(ggplot2)
 library(scatterplot3d)
@@ -73,39 +73,39 @@ head(fulldata)
 
 # All Boxscores
 boxscores = fulldata
-
+head(boxscores,10)
 # Player stats per game
 player_per_game = ddply(fulldata, .(PLAYER), numcolwise(mean, na.rm = TRUE))
 head(player_per_game)
-write.csv(player_per_game, file = "stats/player_per_game.csv")
+
 
 # All Players
 players <- player_per_game[,1]
 head(players, 50)
 
 # Player stats per game by season
-players_pelicans_2014 = subset(fulldata[order(fulldata$PTS),], TEAM=="NOP" & SEASON=="2014")
-pelicans_2014_avgs = ddply(players_pelicans_2014, .(PLAYER), numcolwise(mean, na.rm = TRUE))
-head(pelicans_2014_avgs[order(-pelicans_2014_avgs$PTS),], 40)
 player_per_game_by_season = ddply(fulldata, .(PLAYER, SEASON), numcolwise(mean, na.rm = TRUE))
-write.csv(player_per_game_by_season, file = "stats/player_per_game_by_season.csv")
+player_games_by_season = ddply(fulldata, .(PLAYER, SEASON), summarize, games=length(PLAYER))
+player_per_game_by_season <- merge(player_per_game_by_season, player_games_by_season, by=c("PLAYER", "SEASON"))
+head(player_per_game_by_season, 10)
+
+player_per_game_by_season_team = ddply(fulldata, .(PLAYER, SEASON, TEAM), numcolwise(mean, na.rm = TRUE))
+player_games_by_season_team = ddply(fulldata, .(PLAYER, SEASON, TEAM), summarize, games=length(PLAYER))
+player_per_game_by_season_team <- merge(player_per_game_by_season_team, player_games_by_season_team, by=c("PLAYER", "SEASON", "TEAM"))
+head(player_per_game_by_season_team, 10)
 
 
 # Team stats per game
 team_per_game = ddply(fulldata, .(TEAM), numcolwise(mean, na.rm = TRUE))
-write.csv(team_per_game, file = "stats/team_per_game.csv")
 
 # Team stats per game by season
 team_per_game_by_season = ddply(fulldata, .(TEAM, SEASON), numcolwise(mean, na.rm = TRUE))
-write.csv(team_per_game_by_season, file = "stats/team_per_game_by_season.csv")
 
 # Home vs Away
 home_v_away_per_game = ddply(fulldata, .(HOME.AWAY), numcolwise(mean, na.rm = TRUE))
-write.csv(home_v_away_per_game, file = "stats/home_v_away_per_game.csv")
 
 # Home vs Away
 home_v_away_per_game_by_season = ddply(fulldata, .(HOME.AWAY, SEASON), numcolwise(mean, na.rm = TRUE))
-write.csv(home_v_away_per_game_by_season, file = "stats/home_v_away_per_game_by_season.csv")
 
 # Player Info
 player_info = read.csv("raw/playerInfo.csv")
@@ -119,7 +119,6 @@ player_salaries = ddply(player_salaries_by_season, .(id), summarise, mean_salary
 playerdrops <- c("season")
 player_salaries <- player_salaries[,!(names(player_salaries) %in% playerdrops)]
 head(player_salaries)
-write.csv(player_salaries, file = "stats/player_salaries.csv")
 
 # Team salaries by season
 team_salaries_by_season = ddply(player_salaries_by_season, .(team, season), summarise, 
@@ -128,7 +127,6 @@ team_salaries_by_season = ddply(player_salaries_by_season, .(team, season), summ
                                 sd_salary = sd(salary, na.rm = TRUE)
                                 )
 head(team_salaries_by_season, 50)
-write.csv(team_salaries_by_season, file = "stats/team_salaries_by_season.csv")
 
 team_salaries_2014 = subset(team_salaries_by_season[order(-team_salaries_by_season$mean_salary),], season==2014)
 team_salaries_2012 = subset(team_salaries_by_season[order(-team_salaries_by_season$mean_salary),], season==2012)
@@ -158,26 +156,22 @@ team_salaries$avg_seasons <- team_salaries$checks_paid/team_salaries$players_pai
 teamdrops <- c("season")
 team_salaries <- team_salaries[,!(names(team_salaries) %in% teamdrops)]
 head(team_salaries[order(team_salaries$avg_seasons),])
-write.csv(team_salaries, file = "stats/team_salaries.csv")
 
 # Player salaries by season
 salaries = merge(player_salaries_by_season, team_salaries_by_season, by=c("team","season"))
 head(salaries)
 salaries$percent <- salaries$salary/salaries$total_salary
 head(subset(salaries[order(-salaries$percent),], season==2014), 50)
-write.csv(salaries, file = "stats/player_salaries_by_season.csv")
 
 # Team stats by season
 team_stats_by_season = read.csv("raw/teams.csv")
 team_stats_by_season$percent_w <- team_stats_by_season$w/(team_stats_by_season$w+team_stats_by_season$l)
 head(team_stats_by_season)
-write.csv(team_stats_by_season, file = "stats/team_stats_by_season.csv")
 
 # Team salary and wins analysis
 team_analysis = merge(team_stats_by_season, team_salaries_by_season, by=c("team","season"))
 team_keeps = c("season", "team", "percent_w", "total_salary", "sd_salary")
 team_analysis = team_analysis[team_keeps]
-write.csv(team_analysis, file = "stats/team_analysis.csv")
 head(team_analysis, 30)
 teams_2014 = subset(team_analysis, season==2014)
 ggplot(NULL, aes(teams_2014$percent_w,teams_2014$sd_salary))+geom_point(data = teams_2014, col="red")+geom_text(aes(label=teams_2014$team),hjust=0, vjust=0)+stat_smooth(method="lm", se=FALSE)
@@ -234,3 +228,17 @@ head(player_salaries)
 head(player_salaries_by_season)
 head(team_salaries)
 head(team_salaries_by_season)
+
+write.csv(player_per_game, file = "stats/player_per_game.csv")
+write.csv(player_per_game_by_season, file = "stats/player_per_game_by_season.csv")
+write.csv(player_per_game_by_season_team, file = "stats/player_per_game_by_season_team.csv")
+write.csv(team_per_game, file = "stats/team_per_game.csv")
+write.csv(team_per_game_by_season, file = "stats/team_per_game_by_season.csv")
+write.csv(home_v_away_per_game, file = "stats/home_v_away_per_game.csv")
+write.csv(home_v_away_per_game_by_season, file = "stats/home_v_away_per_game_by_season.csv")
+write.csv(player_salaries, file = "stats/player_salaries.csv")
+write.csv(team_salaries_by_season, file = "stats/team_salaries_by_season.csv")
+write.csv(team_salaries, file = "stats/team_salaries.csv")
+write.csv(salaries, file = "stats/player_salaries_by_season.csv")
+write.csv(team_stats_by_season, file = "stats/team_stats_by_season.csv")
+write.csv(team_analysis, file = "stats/team_analysis.csv")
