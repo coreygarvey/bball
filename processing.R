@@ -70,6 +70,7 @@ nrow(fulldata)
 nrow(advdata)
 nrow(basicdata)
 head(fulldata) 
+names(fulldata)
 
 # All Boxscores
 boxscores = fulldata

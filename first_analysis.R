@@ -2,6 +2,7 @@ setwd('/Users/cgarvey/Documents/NBA/bball/')
 library(plyr)
 library(ggplot2)
 library(scatterplot3d)
+library(reshape)
 
 boxscores = read.csv("stats/boxscores.csv")
 player_per_game = read.csv("stats/player_per_game.csv")
@@ -16,7 +17,12 @@ player_salaries = read.csv("stats/player_salaries.csv")
 player_salaries_by_season = read.csv("stats/player_salaries_by_season.csv")
 team_salaries = read.csv("stats/team_salaries.csv")
 team_salaries_by_season = read.csv("stats/team_salaries_by_season.csv")
-team_stats_by_season = read.csv("raw/teams.csv")
+team_stats_by_season = read.csv("stats/team_stats_by_season.csv")
+
+names(player_info)
+names(player_per_game_by_season_team)
+names(player_salaries_by_season)
+names(team_per_game_by_season)
 
 head(boxscores, 10)
 head(player_per_game, 10)
@@ -166,3 +172,96 @@ summary(lm.fit)
 
 names(players_2014)
 contrasts(players_2014$team)
+
+# Team stats and remove X column
+team_stats_by_season = read.csv("raw/teams.csv")
+teamstatsdrops <- c("X")
+team_stats_by_season <- team_stats_by_season[,!(names(team_stats_by_season) %in% teamstatsdrops)]
+
+lapply(team_stats_by_season, class)
+summary(team_stats_by_season$playoffs)
+
+# Replace playoff results with round
+team_stats_by_season[,12]= sub("^$", "0", team_stats_by_season[,12])
+team_stats_by_season[,12]= sub(".*1st.*", "1", team_stats_by_season[,12])
+team_stats_by_season[,12]= sub(".*Semis", "2", team_stats_by_season[,12])
+team_stats_by_season[,12]= sub(".*Conf\\.\\sFinals", "3", team_stats_by_season[,12])
+team_stats_by_season[,12]= sub("Lost\\sFinals", "4", team_stats_by_season[,12])
+team_stats_by_season[,12]= sub("Won.*", "5", team_stats_by_season[,12])
+head(team_stats_by_season[order(-team_stats_by_season$w),])
+head(team_salaries_by_season, 40)
+
+# League salaries
+total_salaries <- ddply(teams_with_salaries, c("season"), summarise, 
+                        league_salary = sum(as.numeric(total_salary)))
+head(total_salaries)
+
+# Join league salaries with team
+team_salaries_by_season <- merge(team_salaries_by_season, total_salaries, by=c("season"))
+team_salaries_by_season$salary_percentage <- team_salaries_by_season$total_salary/team_salaries_by_season$league_salary*100
+head(team_salaries_by_season)
+
+# Remove x from salaries and join Salaries with Stats
+teamsalarydrops <- c("X")
+team_salaries_by_season <- team_salaries_by_season[,!(names(team_salaries_by_season) %in% teamsalarydrops)]
+head(team_salaries_by_season)
+teams_with_salaries <- merge(team_salaries_by_season, team_stats_by_season, by=c("team", "season"))
+head(teams_with_salaries)
+
+# Filter for playoff teams
+playoff_teams = subset(teams_with_salaries, playoffs>0)
+
+#teams_with_salaries$success = team_stats_by_season$percent_w + max(team_stats_by_season$percent_w)*as.numeric(team_stats_by_season$playoffs)/5
+playoff_teams$success = playoff_teams$percent_w + max(playoff_teams$percent_w)*as.numeric(playoff_teams$playoffs)/5
+head(playoff_teams)
+playoff_teams$salary_skew = playoff_teams$sd_salary/playoff_teams$mean_salary
+playoff_teams$identifier = paste(playoff_teams$season,playoff_teams$team)
+head(playoff_teams)
+
+head(playoff_teams[order(-playoff_teams$salary_skew),])
+
+attach(playoff_teams)
+plot(playoff_teams$salary_percentage, playoff_teams$success)
+
+playoffdata <- ddply(playoff_teams, c("season", "playoffs"), summarise, 
+                     mean_w = mean(percent_w),
+                     mean_salary = mean(total_salary))
+head(playoffdata)
+
+lm.fit=lm(success~salary_percentage+salary_skew, data=playoff_teams)
+summary(lm.fit)
+abline(lm.fit)
+
+# Breakdowns by advancement in the playoffs
+teams_first = subset(playoff_teams, playoffs==1)
+teams_second = subset(playoff_teams, playoffs==2)
+teams_third = subset(playoff_teams, playoffs==3)
+teams_fourth = subset(playoff_teams, playoffs==4)
+teams_fifth = subset(playoff_teams, playoffs==5)
+
+par(mfrow=c(1,1))
+plot(teams_first$percent_w, teams_first$salary_percentage)
+identify(teams_first$season,teams_first$'1',labels=teams_first$identifier)
+plot(teams_second$percent_w, teams_second$salary_percentage)
+plot(teams_third$percent_w, teams_third$salary_percentage)
+plot(teams_fourth$percent_w, teams_fourth$salary_percentage)
+plot(teams_fifth$percent_w, teams_fifth$salary_percentage)
+
+seasons_first = subset(playoffdata, playoffs==1)
+seasons_second = subset(playoffdata, playoffs==2)
+seasons_third = subset(playoffdata, playoffs==3)
+
+plot(seasons_first$mean_w, seasons_first$mean_salary)
+plot(seasons_second$mean_w, seasons_second$mean_salary)
+plot(seasons_third$mean_w, seasons_third$mean_salary)
+
+playoffmeans <- cast(playoffdata, season~playoffs, value="mean_w")
+head(playoffmeans, 29)
+
+plot(playoffmeans$season,playoffmeans$'1')
+
+plot(playoffmeans$season,playoffmeans$'2')
+plot(playoffmeans$season,playoffmeans$'3')
+plot(playoffmeans$season,playoffmeans$'4')
+plot(playoffmeans$season,playoffmeans$'5')
+

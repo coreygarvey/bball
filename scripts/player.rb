@@ -155,7 +155,7 @@ for id in player_ids
 			draftteam = info.scan( /Draft:\s([^,]*),/).last.first
 			puts "draft team " + draftteam
 			# Draft Round
-			draftround = info.scan( /Draft:.*,\s([0-9]{1,2})[a-z]{2}/).last.first
+			draftround = info.scan( /Draft:[^1-5]*,\s([0-9]{1,2})[a-z]{2}/).last.first
 			puts "draft round " + draftround
 			# Draft Round Pick
 			draftroundpick = info.scan( /round\s\(([0-9]{1,2})[a-z]{2}/).last.first
