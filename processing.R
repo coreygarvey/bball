@@ -1,6 +1,6 @@
 setwd('/Users/cgarvey/Documents/NBA/bball/')
-library(plyr)
 library(ggplot2)
+library(plyr)
 library(scatterplot3d)
 
 basicdata_raw = read.csv("raw/basic.csv")
@@ -71,7 +71,7 @@ nrow(advdata)
 nrow(basicdata)
 head(fulldata) 
 names(fulldata)
-
+head(fulldata)
 # All Boxscores
 boxscores = fulldata
 head(boxscores,10)
