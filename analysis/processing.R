@@ -64,7 +64,7 @@ advdata$playergame <- paste(advdata$PLAYER, advdata$GAME)
 advdrops <- c("PLAYER","GAME","HOME.AWAY", "MP", "OPP", "SEASON", "TEAM")
 advdata <- advdata[,!(names(advdata) %in% advdrops)]
 
-#Join basic and advanced data to get table of total information
+# Join basic and advanced data to get table of total information
 fulldata = merge(basicdata, advdata, by="playergame")
 nrow(fulldata)
 nrow(advdata)
@@ -72,13 +72,14 @@ nrow(basicdata)
 head(fulldata) 
 names(fulldata)
 head(fulldata)
+
 # All Boxscores
 boxscores = fulldata
 head(boxscores,10)
+
 # Player stats per game
 player_per_game = ddply(fulldata, .(PLAYER), numcolwise(mean, na.rm = TRUE))
 head(player_per_game)
-
 
 # All Players
 players <- player_per_game[,1]
@@ -90,11 +91,11 @@ player_games_by_season = ddply(fulldata, .(PLAYER, SEASON), summarize, games=len
 player_per_game_by_season <- merge(player_per_game_by_season, player_games_by_season, by=c("PLAYER", "SEASON"))
 head(player_per_game_by_season, 10)
 
+# Player stats per game by season and team
 player_per_game_by_season_team = ddply(fulldata, .(PLAYER, SEASON, TEAM), numcolwise(mean, na.rm = TRUE))
 player_games_by_season_team = ddply(fulldata, .(PLAYER, SEASON, TEAM), summarize, games=length(PLAYER))
 player_per_game_by_season_team <- merge(player_per_game_by_season_team, player_games_by_season_team, by=c("PLAYER", "SEASON", "TEAM"))
 head(player_per_game_by_season_team, 10)
-
 
 # Team stats per game
 team_per_game = ddply(fulldata, .(TEAM), numcolwise(mean, na.rm = TRUE))
@@ -105,7 +106,7 @@ team_per_game_by_season = ddply(fulldata, .(TEAM, SEASON), numcolwise(mean, na.r
 # Home vs Away
 home_v_away_per_game = ddply(fulldata, .(HOME.AWAY), numcolwise(mean, na.rm = TRUE))
 
-# Home vs Away
+# Home vs Away by season
 home_v_away_per_game_by_season = ddply(fulldata, .(HOME.AWAY, SEASON), numcolwise(mean, na.rm = TRUE))
 
 # Player Info
@@ -128,22 +129,6 @@ team_salaries_by_season = ddply(player_salaries_by_season, .(team, season), summ
                                 sd_salary = sd(salary, na.rm = TRUE)
                                 )
 head(team_salaries_by_season, 50)
-
-team_salaries_2014 = subset(team_salaries_by_season[order(-team_salaries_by_season$mean_salary),], season==2014)
-team_salaries_2012 = subset(team_salaries_by_season[order(-team_salaries_by_season$mean_salary),], season==2012)
-team_salaries_1995 = subset(team_salaries_by_season[order(-team_salaries_by_season$mean_salary),], season==1995)
-team_salaries_1996 = subset(team_salaries_by_season[order(-team_salaries_by_season$mean_salary),], season==1996)
-team_salaries_1997 = subset(team_salaries_by_season[order(-team_salaries_by_season$mean_salary),], season==1997)
-
-
-head(team_salaries_2014)
-coef(lm(sd_salary ~ total_salary, data = team_salaries_2014))
-ggplot(NULL, aes(team_salaries_2014$total_salary,team_salaries_2014$sd_salary))+geom_point(data = team_salaries_2014, col="red")+geom_text(aes(label=team_salaries_2014$team),hjust=0, vjust=0)+stat_smooth(method="lm", se=FALSE)
-ggplot(NULL, aes(team_salaries_2012$total_salary,team_salaries_2012$sd_salary))+geom_point(data = team_salaries_2012, col="red")+geom_text(aes(label=team_salaries_2012$team),hjust=0, vjust=0)+stat_smooth(method="lm", se=FALSE)
-ggplot(NULL, aes(team_salaries_1995$total_salary,team_salaries_1995$sd_salary))+geom_point(data = team_salaries_1995, col="red")+geom_text(aes(label=team_salaries_1995$team),hjust=0, vjust=0)+stat_smooth(method="lm", se=FALSE)
-ggplot(NULL, aes(team_salaries_1996$total_salary,team_salaries_1996$sd_salary))+geom_point(data = team_salaries_1996, col="red")+geom_text(aes(label=team_salaries_1996$team),hjust=0, vjust=0)+stat_smooth(method="lm", se=FALSE)
-ggplot(NULL, aes(team_salaries_1997$total_salary,team_salaries_1997$sd_salary))+geom_point(data = team_salaries_1997, col="red")+geom_text(aes(label=team_salaries_1997$team),hjust=0, vjust=0)+stat_smooth(method="lm", se=FALSE)
-
 
 # Team salaries
 team_salaries = ddply(player_salaries_by_season, .(team), summarise,
@@ -174,47 +159,11 @@ team_analysis = merge(team_stats_by_season, team_salaries_by_season, by=c("team"
 team_keeps = c("season", "team", "percent_w", "total_salary", "sd_salary")
 team_analysis = team_analysis[team_keeps]
 head(team_analysis, 30)
-teams_2014 = subset(team_analysis, season==2014)
-ggplot(NULL, aes(teams_2014$percent_w,teams_2014$sd_salary))+geom_point(data = teams_2014, col="red")+geom_text(aes(label=teams_2014$team),hjust=0, vjust=0)+stat_smooth(method="lm", se=FALSE)
-teams_2013 = subset(team_analysis, season==2013)
-ggplot(NULL, aes(teams_2013$percent_w,teams_2013$sd_salary))+geom_point(data = teams_2013, col="red")+geom_text(aes(label=teams_2014$team),hjust=0, vjust=0)+stat_smooth(method="lm", se=FALSE)
-
-# Klay Thompson Data
-klay_per_game = subset(player_per_game[order(player_per_game$PTS),], PLAYER=="thompkl01")
-klay_full = subset(basicdata[order(basicdata$PTS),], PLAYER=="thompkl01")
-nrow(klay)
-head(klay)
-player_by_ppg = player_per_game[with(player_per_game, order(-PTS)), ]
-head(player_by_ppg)
-
-# Games ordered by points
-player_by_pts = basicdata[order(-basicdata$PTS),]
-head(player_by_pts)
-
-# Games ordered by plus minus
-player_by_plus = basicdata[order(-basicdata$PLUS),]
-head(player_by_plus)
-
-# Games above 10 min ordered by points per minute
-player_by_ppm = subset(basicdata[order(-basicdata$ppm),], minutes>10)
-head(player_by_ppm)
-
-# Carmelo Anthony data
-melo_full = subset(basicdata[order(basicdata$PTS),], PLAYER=="anthoca01")
-nrow(melo_full)
-head(melo_full)
-# Basic Scatter Plot
-qplot(FG, FGA, data=melo_full, color=92)
-ggplot(NULL, aes(melo_full$FG,melo_full$FGA))+geom_point(data = melo_full, col="red")
-# 3D Scatterplot
-scatterplot3d(melo_full$FGA,melo_full$FG,melo_full$ppm, main="3D Scatterplot")
 
 # Team
 team_per_game = ddply(fulldata, .(TEAM), numcolwise(mean, na.rm = TRUE))
 head(team_per_game)
 team_per_game
-
-
 
 # Datsets
 head(boxscores)

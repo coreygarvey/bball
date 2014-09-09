@@ -265,3 +265,59 @@ plot(playoffmeans$season,playoffmeans$'3')
 plot(playoffmeans$season,playoffmeans$'4')
 plot(playoffmeans$season,playoffmeans$'5')
 
+
+
+# EXTRA from processing
+
+team_salaries_2014 = subset(team_salaries_by_season[order(-team_salaries_by_season$mean_salary),], season==2014)
+team_salaries_2012 = subset(team_salaries_by_season[order(-team_salaries_by_season$mean_salary),], season==2012)
+team_salaries_1995 = subset(team_salaries_by_season[order(-team_salaries_by_season$mean_salary),], season==1995)
+team_salaries_1996 = subset(team_salaries_by_season[order(-team_salaries_by_season$mean_salary),], season==1996)
+team_salaries_1997 = subset(team_salaries_by_season[order(-team_salaries_by_season$mean_salary),], season==1997)
+
+
+head(team_salaries_2014)
+coef(lm(sd_salary ~ total_salary, data = team_salaries_2014))
+ggplot(NULL, aes(team_salaries_2014$total_salary,team_salaries_2014$sd_salary))+geom_point(data = team_salaries_2014, col="red")+geom_text(aes(label=team_salaries_2014$team),hjust=0, vjust=0)+stat_smooth(method="lm", se=FALSE)
+ggplot(NULL, aes(team_salaries_2012$total_salary,team_salaries_2012$sd_salary))+geom_point(data = team_salaries_2012, col="red")+geom_text(aes(label=team_salaries_2012$team),hjust=0, vjust=0)+stat_smooth(method="lm", se=FALSE)
+ggplot(NULL, aes(team_salaries_1995$total_salary,team_salaries_1995$sd_salary))+geom_point(data = team_salaries_1995, col="red")+geom_text(aes(label=team_salaries_1995$team),hjust=0, vjust=0)+stat_smooth(method="lm", se=FALSE)
+ggplot(NULL, aes(team_salaries_1996$total_salary,team_salaries_1996$sd_salary))+geom_point(data = team_salaries_1996, col="red")+geom_text(aes(label=team_salaries_1996$team),hjust=0, vjust=0)+stat_smooth(method="lm", se=FALSE)
+ggplot(NULL, aes(team_salaries_1997$total_salary,team_salaries_1997$sd_salary))+geom_point(data = team_salaries_1997, col="red")+geom_text(aes(label=team_salaries_1997$team),hjust=0, vjust=0)+stat_smooth(method="lm", se=FALSE)
+
+
+
+teams_2014 = subset(team_analysis, season==2014)
+ggplot(NULL, aes(teams_2014$percent_w,teams_2014$sd_salary))+geom_point(data = teams_2014, col="red")+geom_text(aes(label=teams_2014$team),hjust=0, vjust=0)+stat_smooth(method="lm", se=FALSE)
+teams_2013 = subset(team_analysis, season==2013)
+ggplot(NULL, aes(teams_2013$percent_w,teams_2013$sd_salary))+geom_point(data = teams_2013, col="red")+geom_text(aes(label=teams_2014$team),hjust=0, vjust=0)+stat_smooth(method="lm", se=FALSE)
+
+# Klay Thompson Data
+klay_per_game = subset(player_per_game[order(player_per_game$PTS),], PLAYER=="thompkl01")
+klay_full = subset(basicdata[order(basicdata$PTS),], PLAYER=="thompkl01")
+nrow(klay)
+head(klay)
+player_by_ppg = player_per_game[with(player_per_game, order(-PTS)), ]
+head(player_by_ppg)
+
+# Games ordered by points
+player_by_pts = basicdata[order(-basicdata$PTS),]
+head(player_by_pts)
+
+# Games ordered by plus minus
+player_by_plus = basicdata[order(-basicdata$PLUS),]
+head(player_by_plus)
+
+# Games above 10 min ordered by points per minute
+player_by_ppm = subset(basicdata[order(-basicdata$ppm),], minutes>10)
+head(player_by_ppm)
+
+# Carmelo Anthony data
+melo_full = subset(basicdata[order(basicdata$PTS),], PLAYER=="anthoca01")
+nrow(melo_full)
+head(melo_full)
+# Basic Scatter Plot
+qplot(FG, FGA, data=melo_full, color=92)
+ggplot(NULL, aes(melo_full$FG,melo_full$FGA))+geom_point(data = melo_full, col="red")
+# 3D Scatterplot
+scatterplot3d(melo_full$FGA,melo_full$FG,melo_full$ppm, main="3D Scatterplot")
+

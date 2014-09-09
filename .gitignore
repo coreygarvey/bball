@@ -5,5 +5,5 @@
 #   git config --global core.excludesfile '~/.gitignore_global'
 
 # Ignore data
-/stats
-/raw
+/data/stats/
+/data/raw/
