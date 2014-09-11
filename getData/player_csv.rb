@@ -2,7 +2,7 @@ require 'rubygems'
 require 'mechanize' 
 require 'nokogiri'
 require 'csv'
-
+require 'mysql'
 
 
 agent = Mechanize.new
@@ -234,6 +234,8 @@ for id in player_ids
 	end
 
 end
+
+
 
 
 
