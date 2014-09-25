@@ -4,26 +4,29 @@ library(ggplot2)
 library(scatterplot3d)
 library(reshape)
 
-boxscores = read.csv("stats/boxscores.csv")
-player_per_game = read.csv("stats/player_per_game.csv")
-player_per_game_by_season = read.csv("stats/player_per_game_by_season.csv")
-player_per_game_by_season_team = read.csv("stats/player_per_game_by_season_team.csv")
-team_per_game = read.csv("stats/team_per_game.csv")
-team_per_game_by_season = read.csv("stats/team_per_game_by_season.csv")
-home_v_away_per_game = read.csv("stats/home_v_away_per_game.csv")
-home_v_away_per_game_by_season = read.csv("stats/home_v_away_per_game_by_season.csv")
-player_info = read.csv("stats/player_info.csv")
-player_salaries = read.csv("stats/player_salaries.csv")
-player_salaries_by_season = read.csv("stats/player_salaries_by_season.csv")
-team_salaries = read.csv("stats/team_salaries.csv")
-team_salaries_by_season = read.csv("stats/team_salaries_by_season.csv")
-team_stats_by_season = read.csv("stats/team_stats_by_season.csv")
+## Import all data sets from CSV ##
+boxscores = read.csv("data/stats/boxscores.csv")
+player_per_game = read.csv("data/stats/player_per_game.csv")
+player_per_game_by_season = read.csv("data/stats/player_per_game_by_season.csv")
+player_per_game_by_season_team = read.csv("data/stats/player_per_game_by_season_team.csv")
+team_per_game = read.csv("data/stats/team_per_game.csv")
+team_per_game_by_season = read.csv("data/stats/team_per_game_by_season.csv")
+home_v_away_per_game = read.csv("data/stats/home_v_away_per_game.csv")
+home_v_away_per_game_by_season = read.csv("data/stats/home_v_away_per_game_by_season.csv")
+player_info = read.csv("data/stats/player_info.csv")
+player_salaries = read.csv("data/stats/player_salaries.csv")
+player_salaries_by_season = read.csv("data/stats/player_salaries_by_season.csv")
+team_salaries = read.csv("data/stats/team_salaries.csv")
+team_salaries_by_season = read.csv("data/stats/team_salaries_by_season.csv")
 
+
+## Look into columns in each ##
 names(player_info)
 names(player_per_game_by_season_team)
 names(player_salaries_by_season)
 names(team_per_game_by_season)
 
+## Look at first 10 rows of each ##
 head(boxscores, 10)
 head(player_per_game, 10)
 head(player_per_game_by_season, 10)
@@ -39,11 +42,11 @@ head(team_salaries, 10)
 head(team_salaries_by_season, 10)
 head(team_stats_by_season, 10)
 
-# Isolate player games
+## Isolate player games ##
 player_games_by_season = player_per_game_by_season[,c("PLAYER", "SEASON", "games")]
 head(player_games_by_season,10)
 
-# Stat calculations
+## Stat calculations ##
 boxscores_2014 = subset(boxscores[order(-boxscores$PTS),], SEASON==2014)
 head(boxscores_2014)
 total_points = sum(boxscores_2014$PTS)
@@ -52,7 +55,7 @@ total_rebounds = sum(boxscores_2014$TRB)
 total_steals = sum(boxscores_2014$STL)
 total_minutes = sum(boxscores_2014$minutes)
 
-# Salary calculations
+## Cash paid out for statistics ##
 player_salaries_2014 = subset(player_salaries_by_season[order(-player_salaries_by_season$salary),], season==2014)
 total_salary = sum(player_salaries_2014$salary)
 cash_per_pt = total_salary/total_points
@@ -63,36 +66,25 @@ cash_per_min = total_salary/total_minutes
 cash_per_stat = total_salary/sum(total_points,total_assists,total_rebounds,total_steals)
 cash_per_stat
 
-# 2014 team and player stats
-team_stats_2014 = subset(team_stats_by_season, season==2014)
+## 2014 player stats ##
 player_per_game_team_2014 = subset(player_per_game_by_season_team, SEASON==2014)
 player_per_game_2014 = subset(player_per_game_by_season, SEASON==2014)
 
-# PLAYER - Join data sets and drop columns we don't want
+## PLAYER - Join data sets and drop columns we don't want ##
 player_per_game_2014 <- merge(player_per_game_2014, player_salaries_by_season, by.x=c("PLAYER", "SEASON"), by.y=c("id", "season"))
 salarydrops <- c("X.x","X.y","mean_salary")
 player_per_game_2014 <- player_per_game_2014[,!(names(player_per_game_2014) %in% salarydrops)]
 head(player_per_game_2014,10)
 
-# Payout by stat
+## Payout by stat - How much should players be paid for their stats ##
 player_per_game_2014$pts_payout <- player_per_game_2014$PTS*cash_per_pt
 player_per_game_2014$ast_payout <- player_per_game_2014$AST*cash_per_ast
 player_per_game_2014$trb_payout <- player_per_game_2014$TRB*cash_per_trb
 player_per_game_2014$stl_payout <- player_per_game_2014$STL*cash_per_stl
 player_per_game_2014$stat_payout <- (player_per_game_2014$PTS+player_per_game_2014$AST+player_per_game_2014$TRB+player_per_game_2014$STL)*cash_per_stat
 player_per_game_2014$min_payout <- player_per_game_2014$minutes*cash_per_min
-player_per_game_2014$salary_per <- player_per_game_2014$salary*player_per_game_2014$games
-
-# Isolate important stats, get player relative value (diff) measured as money earned vs money paid
-
+player_per_game_2014$game_payout <- player_per_game_2014$salary*player_per_game_2014$games
 head(player_per_game_2014)
-payouts_2014 = player_per_game_2014[,c("PLAYER", "salary", "PTS", "AST", "TRB", "STL", "minutes", "pts_payout", "ast_payout", "trb_payout", "stl_payout", "min_payout", "stat_payout", "salary_per")]
-payouts_2014$pts_diff <- payouts_2014$pts_payout - payouts_2014$salary_per
-payouts_2014$ast_diff <- payouts_2014$ast_payout - payouts_2014$salary_per
-payouts_2014$trb_diff <- payouts_2014$trb_payout - payouts_2014$salary_per
-payouts_2014$stl_diff <- payouts_2014$stl_payout - payouts_2014$salary_per
-payouts_2014$min_diff <- payouts_2014$min_payout - payouts_2014$salary_per
-payouts_2014$stat_diff <- payouts_2014$stat_payout - payouts_2014$salary_per
 
 # PLAYER-TEAM - Join data sets and drop columns we don't want
 player_per_game_team_2014 <- merge(player_per_game_team_2014, player_salaries_by_season, by.x=c("PLAYER", "SEASON"), by.y=c("id", "season"))
@@ -102,13 +94,7 @@ player_per_game_team_2014 <- merge(player_per_game_team_2014, player_games_by_se
 player_per_game_team_2014$eff_salary <- player_per_game_team_2014$salary*(player_per_game_team_2014$games.x/player_per_game_team_2014$games.y)
 head(player_per_game_team_2014,10)
 
-head(payouts_2014[order(-payouts_2014$pts_diff),])
-head(payouts_2014[order(-payouts_2014$ast_diff),])
-head(payouts_2014[order(-payouts_2014$trb_diff),])
-head(payouts_2014[order(-payouts_2014$stl_diff),])
-head(payouts_2014[order(-payouts_2014$min_diff),])
-head(payouts_2014[order(payouts_2014$stat_diff),])
-head(player_per_game_2014)
+
 
 
 
@@ -173,15 +159,16 @@ summary(lm.fit)
 names(players_2014)
 contrasts(players_2014$team)
 
-# Team stats and remove X column
-team_stats_by_season = read.csv("raw/teams.csv")
+##### TEAM ANALYSIS #####
+team_stats_by_season = read.csv("data/raw/teams.csv")
+team_stats_2014 = subset(team_stats_by_season, season==2014)
 teamstatsdrops <- c("X")
 team_stats_by_season <- team_stats_by_season[,!(names(team_stats_by_season) %in% teamstatsdrops)]
 
 lapply(team_stats_by_season, class)
 summary(team_stats_by_season$playoffs)
 
-# Replace playoff results with round
+#### Replace playoff results with point value ####
 team_stats_by_season[,12]= sub("^$", "0", team_stats_by_season[,12])
 team_stats_by_season[,12]= sub(".*1st.*", "1", team_stats_by_season[,12])
 team_stats_by_season[,12]= sub(".*Semis", "2", team_stats_by_season[,12])
@@ -191,7 +178,7 @@ team_stats_by_season[,12]= sub("Won.*", "5", team_stats_by_season[,12])
 head(team_stats_by_season[order(-team_stats_by_season$w),])
 head(team_salaries_by_season, 40)
 
-# League salaries
+#### League salaries ####
 total_salaries <- ddply(teams_with_salaries, c("season"), summarise, 
                         league_salary = sum(as.numeric(total_salary)))
 head(total_salaries)
