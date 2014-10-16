@@ -15,11 +15,12 @@ box_subset = subset(box_short, FGA > 15)
 box_merge = merge(player_info, box_subset, by.x=c("id"), by.y=c("PLAYER"))
 box_merge["FG."] = round(box_merge["FG."]*100,2)
 box_order = box_merge[order(-box_merge$FG.),] 
-box_out = box_order[,c("name", "FG", "FGA", "FG.", "TEAM", "SEASON", "hofyear")]
-colnames(box_out)=c("Name","FG","FGA","FG%","TEAM","SEASON","HOF")
+box_out = box_order[,c("name", "FG.", "SEASON")]
+colnames(box_out)=c("Name","FG%","Season")
 
 
 box_out = head(box_out, 12)
+box_out
 
 ### FGP CSV used in html ###
 write.csv(box_out, file = sprintf("data/stats/front_stats/fgp.csv"), row.names=FALSE)
