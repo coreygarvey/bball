@@ -10,7 +10,7 @@ and recreation of advanced basketball metrics using R.
 
 
 ### Deliverables
-* Web Scraping of historic NBA box scores and shot charts
+* Web scraping of historic NBA box scores and shot charts
 * Analysis of data through various R scripts
 
 
