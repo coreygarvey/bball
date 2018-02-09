@@ -7,3 +7,4 @@
 # Ignore data
 /data/stats/
 /data/raw/
+*config.py
